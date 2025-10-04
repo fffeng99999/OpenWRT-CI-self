@@ -157,6 +157,13 @@ jobs:
 
           $GITHUB_WORKSPACE/Scripts/Packages.sh
           $GITHUB_WORKSPACE/Scripts/Handles.sh
+        
+      - name: Generate Extra Kmod List
+        run: |
+          # 安装 Python 依赖
+          pip3 install requests beautifulsoup4
+          # 运行我们创建的脚本
+          python3 $GITHUB_WORKSPACE/Scripts/Generate-Kmod-List.py
 
       - name: Custom Settings
         run: |
@@ -165,7 +172,9 @@ jobs:
           if [[ "${WRT_CONFIG,,}" == *"test"* ]]; then
             cat $GITHUB_WORKSPACE/Config/$WRT_CONFIG.txt >> .config
           else
-            cat $GITHUB_WORKSPACE/Config/$WRT_CONFIG.txt $GITHUB_WORKSPACE/Config/GENERAL.txt >> .config
+            cat $GITHUB_WORKSPACE/Config/$WRT_CONFIG.txt \
+            $GITHUB_WORKSPACE/Config/GENERAL.txt \
+            $GITHUB_WORKSPACE/kmods-extra.txt >> .config
           fi
 
           $GITHUB_WORKSPACE/Scripts/Settings.sh
@@ -200,6 +209,23 @@ jobs:
 
       - name: Package Firmware
         run: |
+
+          # 新增：打包所有 KMODS
+          echo "Start packaging kmods..."
+          KMODS_PATH="./wrt/bin/packages/${{env.WRT_TARGET}}_cortex-a53/base" # 注意：这里的架构名称可能需要根据实际情况微调
+          if [ -d "$KMODS_PATH" ]; then
+            mkdir -p ./wrt/upload/kmods
+            find "$KMODS_PATH" -type f -name "kmod-*.ipk" -exec mv {} ./wrt/upload/kmods/ \;
+            cd ./wrt/upload
+            zip -r kmods-${{env.WRT_CONFIG}}-${{env.WRT_INFO}}-${{env.WRT_DATE}}.zip kmods
+            rm -rf ./kmods
+            cd ../../
+            echo "Kmods packaged successfully!"
+          else
+            echo "Kmods directory not found, skipping packaging."
+          fi
+          # --- ^^^^^^ 新代码结束 ^^^^^^ ---
+
           cd ./wrt/ && mkdir ./upload/
 
           cp -f ./.config ./upload/Config-"$WRT_CONFIG"-"$WRT_INFO"-"$WRT_BRANCH"-"$WRT_DATE".txt
@@ -228,11 +254,8 @@ jobs:
           tag_name: ${{env.WRT_CONFIG}}-${{env.WRT_INFO}}-${{env.WRT_BRANCH}}-${{env.WRT_DATE}}
           files: ./wrt/upload/*.*
           body: |
-            这是个平台固件包，内含多个设备！
-            请注意选择你需要的设备固件！
-            不要问，刷就完事了！
 
-            全系带开源硬件加速，别问了！
+            全系带开源硬件加速。
 
             源码：${{env.WRT_REPO}}
             分支：${{env.WRT_BRANCH}}
