@@ -1,5 +1,5 @@
 #CI项目
-name: Build-AP8220 # 新的工作流名称
+name: OWRT-Build-AP8220 # 新的工作流名称
 
 #CI计划
 on:
