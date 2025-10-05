@@ -94,15 +94,28 @@ jobs:
 
       - name: Clone Code
         run: |
-          git clone --depth=1 --single-branch --branch $WRT_BRANCH $WRT_REPO ./wrt/
+          if [ -d "./wrt/.git" ]; then
+            echo "Repo exists, updating..."
+            cd ./wrt
+            git fetch --depth=1 origin $WRT_BRANCH
+            git reset --hard origin/$WRT_BRANCH
+            cd ..
+          else
+            echo "Repo does not exist, cloning..."
+            git clone --depth=1 --single-branch --branch $WRT_BRANCH $WRT_REPO ./wrt/
+          fi
 
-          cd ./wrt/ && echo "WRT_HASH=$(git log -1 --pretty=format:'%h')" >> $GITHUB_ENV
+          # 记录最新 commit hash
+          cd ./wrt/
+          echo "WRT_HASH=$(git log -1 --pretty=format:'%h')" >> $GITHUB_ENV
+          cd ..
 
           # GitHub Action 移除国内下载源
           PROJECT_MIRRORS_FILE="./scripts/projectsmirrors.json"
           if [ -f "$PROJECT_MIRRORS_FILE" ]; then
             sed -i '/.cn\//d; /tencent/d; /aliyun/d' "$PROJECT_MIRRORS_FILE"
           fi
+
 
       - name: Check Scripts
         run: |
