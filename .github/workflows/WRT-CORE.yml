@@ -171,14 +171,14 @@ jobs:
           $GITHUB_WORKSPACE/Scripts/Packages.sh
           $GITHUB_WORKSPACE/Scripts/Handles.sh
         
-      - name: Generate Extra Kmod List
-        run: |
-          # 安装 Python 依赖
-          # pip3 install requests beautifulsoup4
-          sudo apt-get update
-          sudo apt-get install -y python3-requests python3-bs4
-          # 运行我们创建的脚本
-          python3 $GITHUB_WORKSPACE/Scripts/Generate-Kmod-List.py
+      # - name: Generate Extra Kmod List
+      #   run: |
+      #     # 安装 Python 依赖
+      #     # pip3 install requests beautifulsoup4
+      #     sudo apt-get update
+      #     sudo apt-get install -y python3-requests python3-bs4
+      #     # 运行我们创建的脚本
+      #     python3 $GITHUB_WORKSPACE/Scripts/Generate-Kmod-List.py
 
       - name: Custom Settings
         run: |
