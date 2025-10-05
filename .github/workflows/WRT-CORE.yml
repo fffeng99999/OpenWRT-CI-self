@@ -184,6 +184,9 @@ jobs:
         run: |
           cd ./wrt/
 
+          # 新增：如果 kmods-extra.txt 文件不存在，则创建一个空文件以防 cat 命令报错
+          touch $GITHUB_WORKSPACE/kmods-extra.txt
+
           if [[ "${WRT_CONFIG,,}" == *"test"* ]]; then
             cat $GITHUB_WORKSPACE/Config/$WRT_CONFIG.txt >> .config
           else
