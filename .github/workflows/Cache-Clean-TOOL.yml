@@ -1,0 +1,25 @@
+name: Cache-Clean-TOOL
+
+on:
+  workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+  cleanup:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@main
+
+      - name: Clean Python Host Cache
+        run: |
+          echo "Removing host staging and build cache for Python / gettext / ncurses..."
+          # 仅删除 host 工具相关缓存，不影响 target 或源码
+          rm -rf staging_dir/hostpkg/bin/python3*
+          rm -rf staging_dir/hostpkg/lib/python3*
+          rm -rf staging_dir/hostpkg/include/python3*
+          rm -rf staging_dir/hostpkg/share/gettext
+          rm -rf build_dir/hostpkg/python3-*
+          rm -rf build_dir/hostpkg/gettext-*
+          echo "Host cache cleaned."
